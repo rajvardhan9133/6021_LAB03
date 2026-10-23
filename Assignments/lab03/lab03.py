@@ -94,7 +94,10 @@ class FluidLevelDetector:
         Returns:
             np.ndarray: 2D uint8 binary image, same shape.
         """
-        raise NotImplementedError("Implement this method")
+        '''raise NotImplementedError("Implement this method")'''
+        kernel = np.ones((self.kernel_size,self.kernel_size), np.uint8)
+        closed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+        return closed
 
     def detect_edges(self, binary):
         """Step 3 — Canny edge detection.
