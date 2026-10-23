@@ -75,7 +75,15 @@ class FluidLevelDetector:
         Returns:
             np.ndarray: 2D uint8 binary image (values 0 or 255).
         """
-        raise NotImplementedError("Implement this method")
+        '''raise NotImplementedError("Implement this method")'''
+        _, binary = cv2.threshold(
+            image_gray,
+            self.threshold_value,
+            255,
+            cv2.THRESH_BINARY_INV
+        )
+
+        return binary
 
     def close_gaps(self, binary):
         """Step 2 — morphological closing to fill small holes and gaps.
