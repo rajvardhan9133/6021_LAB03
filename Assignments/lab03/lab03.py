@@ -108,8 +108,14 @@ class FluidLevelDetector:
         Returns:
             np.ndarray: 2D uint8 edge image (edges are 255, everything else 0).
         """
-        raise NotImplementedError("Implement this method")
-
+        '''raise NotImplementedError("Implement this method")'''
+        edges = cv2.Canny(
+            binary,
+            self.canny_low,
+            self.canny_high
+        )
+        return edges
+    
     def mask_roi(self, edges):
         """Step 4 — keep only the edges inside the region of interest (self.roi).
 
