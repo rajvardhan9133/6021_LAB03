@@ -125,8 +125,11 @@ class FluidLevelDetector:
         Returns:
             np.ndarray: 2D uint8 edge image, zero outside the region of interest.
         """
-        raise NotImplementedError("Implement this method")
-
+        '''raise NotImplementedError("Implement this method")'''
+        mask = np.zeros_like(edges)
+        cv2.fillPoly(mask, self.roi, 255)
+        masked_edges=cv2.bitwise_and(edges, edges, mask=mask)
+        return masked_edges
     def find_lines(self, masked_edges):
         """Step 5 — find straight line segments with the probabilistic Hough transform.
 
