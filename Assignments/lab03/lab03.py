@@ -130,6 +130,7 @@ class FluidLevelDetector:
         cv2.fillPoly(mask, self.roi, 255)
         masked_edges=cv2.bitwise_and(edges, edges, mask=mask)
         return masked_edges
+    
     def find_lines(self, masked_edges):
         """Step 5 — find straight line segments with the probabilistic Hough transform.
 
@@ -141,6 +142,7 @@ class FluidLevelDetector:
             Shape (0, 4) if no lines are found.
         """
         '''raise NotImplementedError("Implement this method")'''
+        
         lines = cv2.HoughLinesP(
             masked_edges,
             self.hough_rho,
@@ -167,8 +169,22 @@ class FluidLevelDetector:
         Returns:
             list of (x1, y1, x2, y2): the lines that pass.
         """
-        raise NotImplementedError("Implement this method")
+        '''raise NotImplementedError("Implement this method")'''
 
+        horizontal = []
+
+        for x1, y1, x2, y2 in lines:
+
+           if x2 == x1:
+             continue
+
+           slope = (y2 - y1) / (x2 - x1)
+
+           if abs(slope) <= self.slope_threshold:
+              horizontal.append((x1, y1, x2, y2))
+
+        return horizontal
+    
     def calculate_fluid_levels(self, horizontal_lines, image_width):
         """Step 7 — one fluid level (a y value) for each bottle.
 
@@ -184,7 +200,22 @@ class FluidLevelDetector:
         Returns:
             list: [y_left, y_mid, y_right]. float('inf') for a bottle with no lines.
         """
-        raise NotImplementedError("Implement this method")
+        '''raise NotImplementedError("Implement this method")'''
+
+        groups = [[], [], []]
+
+        for x1, y1, x2, y2 in horizontal_lines:
+            x_centre = (x1 + x2) / 2
+            y_centre = (y1 + y2) / 2
+
+            column = min(int(x_centre // (image_width / 3)), 2)
+
+            groups[column].append(y_centre)
+
+        return [
+        float(np.median(group)) if group else float('inf')
+        for group in groups
+        ]
 
     def detect_fluid_levels(self, image_gray):
         """Step 8 — run the whole pipeline using the methods above.
@@ -199,4 +230,23 @@ class FluidLevelDetector:
         Returns:
             list: [y_left, y_mid, y_right] — the fluid level in each bottle.
         """
-        raise NotImplementedError("Implement this method")
+        '''raise NotImplementedError("Implement this method")'''
+
+        self.thresholded = self.threshold(image_gray)
+
+        self.closed = self.close_gaps(self.thresholded)
+
+        self.edges = self.detect_edges(self.closed)
+
+        self.masked_edges = self.mask_roi(self.edges)
+
+        self.lines = self.find_lines(self.masked_edges)
+
+        self.horizontal_lines = self.select_horizontal_lines(self.lines)
+
+        self.fluid_levels = self.calculate_fluid_levels(
+            self.horizontal_lines,
+            image_gray.shape[1]
+            )
+
+        return self.fluid_levels
