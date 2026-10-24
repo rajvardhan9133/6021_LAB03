@@ -140,7 +140,20 @@ class FluidLevelDetector:
             np.ndarray: shape (N, 4) — one row per line, (x1, y1, x2, y2).
             Shape (0, 4) if no lines are found.
         """
-        raise NotImplementedError("Implement this method")
+        '''raise NotImplementedError("Implement this method")'''
+        lines = cv2.HoughLinesP(
+            masked_edges,
+            self.hough_rho,
+            self.hough_theta,
+            self.hough_threshold,
+            minLineLength=self.min_line_len,
+            maxLineGap=self.max_line_gap
+            )
+
+        if lines is None:
+           return np.empty((0, 4), dtype=np.int32)
+
+        return lines.reshape(-1, 4)
 
     def select_horizontal_lines(self, lines):
         """Step 6 — keep only lines that are close to horizontal.
